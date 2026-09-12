@@ -48,6 +48,13 @@ def test_valid_capability_claims_can_be_constructed():
     assert claims.usage_policy == UsagePolicy.ONE_TIME
 
 
+def test_bounded_resource_labels_may_contain_spaces_but_not_path_traversal():
+    claims = make_claims(resource="document folder")
+    assert claims.resource == "document folder"
+    with pytest.raises(ValueError, match="bounded relative resource"):
+        make_claims(resource="../Secrets")
+
+
 def test_valid_repeatable_usage_policy_is_accepted():
     assert make_claims(usage_policy=UsagePolicy.REPEATABLE).usage_policy == UsagePolicy.REPEATABLE
 

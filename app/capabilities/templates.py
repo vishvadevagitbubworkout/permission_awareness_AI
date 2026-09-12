@@ -47,6 +47,27 @@ FILE_READ = CapabilityTemplateDefinition(
     description="Read a file resource without executing it.",
 )
 
+# These are the canonical, developer-owned file capabilities advertised to M1.
+# They deliberately contain no executable code; M6 will be responsible for any
+# filesystem implementation after M5 has verified a token.
+FILE_LIST = CapabilityTemplateDefinition(
+    capability_id="file.list", agent="file_manager", operation="LIST",
+    resource_type=ResourceType.FILE, parameters={"mode": "list"},
+    risk_level=RiskLevel.LOW, description="List a bounded file resource.",
+)
+
+FILE_MOVE = CapabilityTemplateDefinition(
+    capability_id="file.move", agent="file_manager", operation="MOVE",
+    resource_type=ResourceType.FILE, parameters={"mode": "move"},
+    risk_level=RiskLevel.MEDIUM, description="Move a file within an approved scope.",
+)
+
+FILE_RENAME = CapabilityTemplateDefinition(
+    capability_id="file.rename", agent="file_manager", operation="RENAME",
+    resource_type=ResourceType.FILE, parameters={"mode": "rename"},
+    risk_level=RiskLevel.MEDIUM, description="Rename a file within an approved scope.",
+)
+
 FILE_CREATE = CapabilityTemplateDefinition(
     capability_id="file.create",
     agent="file_manager",
@@ -78,7 +99,10 @@ FILE_DELETE = CapabilityTemplateDefinition(
 )
 
 APPROVED_CAPABILITY_TEMPLATES: list[CapabilityTemplateDefinition] = [
+    FILE_LIST,
     FILE_READ,
+    FILE_MOVE,
+    FILE_RENAME,
     FILE_CREATE,
     FILE_WRITE,
     FILE_DELETE,
@@ -94,6 +118,9 @@ __all__ = [
     "CapabilityTemplateDefinition",
     "FILE_CREATE",
     "FILE_DELETE",
+    "FILE_LIST",
+    "FILE_MOVE",
+    "FILE_RENAME",
     "FILE_READ",
     "FILE_WRITE",
     "ResourceType",

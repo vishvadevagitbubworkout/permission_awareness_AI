@@ -19,6 +19,9 @@ _TEMPLATE_CONTRACTS = {
     "FILE_READ": ("READ", "READ"),
     "FILE_MOVE": ("MOVE", "MOVE"),
     "FILE_RENAME": ("RENAME", "RENAME"),
+    "FILE_CREATE": ("CREATE", "CREATE"),
+    "FILE_WRITE": ("WRITE", "WRITE"),
+    "FILE_DELETE": ("DELETE", "DELETE"),
     "BROWSER_OPEN": ("BROWSER_OPEN", "BROWSER_OPEN"),
     "EMAIL_DRAFT": ("EMAIL_DRAFT", "EMAIL_DRAFT"),
     "EMAIL_SEND": ("EMAIL_SEND", "EMAIL_SEND"),
@@ -66,7 +69,12 @@ def _deterministic_contract_mismatches(task_plan: TaskPlan) -> list[str]:
             mismatches.append(step.step_id)
             continue
         expected_operation, expected_intent = contract
-        if step.operation.upper() != expected_operation or step.intent.value != expected_intent:
+        # A reviewed legacy planner label may reach M2 from older M1 versions;
+        # normalize only that exact label, never arbitrary operation text.
+        operation = step.operation.upper()
+        if operation == "USER_REQUESTED_READ_DOCUMENTS":
+            operation = "READ"
+        if operation != expected_operation or step.intent.value != expected_intent:
             mismatches.append(step.step_id)
     return mismatches
 

@@ -40,16 +40,17 @@ original_request. Include every logical action as a separate step and do not omi
 required planning information. Use null when no resource is specified and an
 empty object when there are no parameters.
 
-The only allowed intents are exactly: LIST, READ, MOVE, RENAME, BROWSER_OPEN,
-EMAIL_DRAFT, EMAIL_SEND, and ASK_CLARIFICATION. If the user's request asks for
+The only allowed intents are exactly: LIST, READ, MOVE, RENAME, CREATE, WRITE,
+DELETE, BROWSER_OPEN, EMAIL_DRAFT, EMAIL_SEND, and ASK_CLARIFICATION. If the user's request asks for
 an operation outside these supported intents, the planner MUST use
 ASK_CLARIFICATION. This is an unsupported intent situation: do not invent an
-unsupported intent such as CREATE, DELETE, COPY, DOWNLOAD, EXECUTE, SEARCH, or
+unsupported intent such as COPY, DOWNLOAD, EXECUTE, SEARCH, or
 any other unsupported value. Unsupported intents must not be invented and must
 route to ASK_CLARIFICATION. Do not claim that an unsupported operation is
 supported. If confidence is below 0.70, use ASK_CLARIFICATION and do not
 propose a more specific intent. The allowed templates are exactly: FILE_LIST,
-FILE_READ, FILE_MOVE, FILE_RENAME, BROWSER_OPEN, EMAIL_DRAFT, and EMAIL_SEND.
+FILE_READ, FILE_MOVE, FILE_RENAME, FILE_CREATE, FILE_WRITE, FILE_DELETE,
+BROWSER_OPEN, EMAIL_DRAFT, and EMAIL_SEND.
 Do not emit shell commands or absolute filesystem paths. A file reference must
 be an opaque token such as file_001, never a raw filesystem path.
 

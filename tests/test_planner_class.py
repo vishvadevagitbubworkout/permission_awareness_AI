@@ -48,7 +48,7 @@ def test_planner_coordinates_prompt_model_and_validation():
     plan = Planner(client).create_plan("Read report.pdf from Documents")
 
     assert isinstance(plan, TaskPlan)
-    assert plan.steps[0].agent == "file_agent"
+    assert plan.steps[0].agent == "file_manager"
     assert len(client.prompts) == 1
     assert "Read report.pdf from Documents" in client.prompts[0]
 
@@ -81,8 +81,21 @@ def test_planner_identifies_simple_file_task():
 
     plan = planner.create_plan("Read report.pdf from Documents.")
 
-    assert plan.steps[0].agent == "file_agent"
+    assert plan.steps[0].agent == "file_manager"
     assert plan.steps[0].operation == "READ"
+
+
+def test_planner_normalizes_a_file_template_to_the_m3_contract():
+    planner = make_planner({
+        "task_id": "task_001", "original_request": "Create report.pdf in Documents.",
+        "steps": [{"step_id": "step_001", "agent": "user",
+                   "operation": "create report.pdf", "resource": "Documents",
+                   "template": "FILE_CREATE", "intent": "CREATE", "parameters": {}}],
+    })
+    plan = planner.create_plan("Create report.pdf in Documents.")
+    assert (plan.steps[0].agent, plan.steps[0].operation, plan.steps[0].parameters) == (
+        "file_manager", "CREATE", {"mode": "create"}
+    )
 
 
 def test_planner_identifies_multiple_logical_actions():
@@ -198,7 +211,7 @@ def test_planner_rejects_model_replacing_original_request():
         planner.create_plan("Delete secret.txt")
 
 
-@pytest.mark.parametrize("unsupported_intent", ["CREATE", "DELETE", "COPY", "DOWNLOAD", "EXECUTE"])
+@pytest.mark.parametrize("unsupported_intent", ["COPY", "DOWNLOAD", "EXECUTE"])
 def test_planner_routes_unsupported_intent_to_clarification(unsupported_intent, tmp_path):
     request = "create new file called sun.pdf in documents"
     response = json.dumps(

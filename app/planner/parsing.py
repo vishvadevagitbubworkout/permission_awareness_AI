@@ -44,8 +44,14 @@ def parse_task_plan(
     if not isinstance(raw_response, str) or not raw_response.strip():
         raise PlanParsingError("The model returned an empty planning response.")
 
+    normalized_response = raw_response.strip()
+    # Models occasionally wrap otherwise valid JSON in a Markdown JSON fence.
+    # Accept that presentation-only wrapper, but still require the enclosed
+    # value to be one complete JSON object and validate it normally.
+    if normalized_response.startswith("```json") and normalized_response.endswith("```"):
+        normalized_response = normalized_response[7:-3].strip()
     try:
-        payload = json.loads(raw_response)
+        payload = json.loads(normalized_response)
     except json.JSONDecodeError as error:
         raise PlanParsingError("The model returned invalid JSON.") from error
 

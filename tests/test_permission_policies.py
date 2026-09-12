@@ -77,10 +77,8 @@ def test_developer_file_policies_load_for_every_m3_file_capability():
     registry = PermissionPolicyRegistry()
 
     assert [policy.capability_id for policy in registry.list()] == [
-        "file.read",
-        "file.create",
-        "file.write",
-        "file.delete",
+        "file.list", "file.read", "file.create", "file.write", "file.delete",
+        "file.move", "file.rename",
     ]
     assert len(registry.list()) == len(APPROVED_PERMISSION_POLICIES)
 

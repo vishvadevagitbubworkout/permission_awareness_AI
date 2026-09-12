@@ -32,6 +32,11 @@ class OllamaClient:
                 "model": self.model,
                 "prompt": prompt,
                 "stream": False,
+                # Ollama enforces JSON syntax while temperature zero reduces
+                # presentation variability. Schema and security validation
+                # still happen downstream; this is not a trust decision.
+                "format": "json",
+                "options": {"temperature": 0},
             }
         ).encode("utf-8")
         request = Request(

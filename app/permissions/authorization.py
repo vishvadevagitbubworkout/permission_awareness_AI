@@ -101,7 +101,7 @@ class TaskAuthorizationManager:
             decision = self.evaluator.evaluate(
                 capability,
                 agent=step.agent,
-                operation=step.operation,
+                operation=capability.operation,
                 resource_type=capability.resource_type,
                 scope=scope,
                 parameters=step.parameters,

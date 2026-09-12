@@ -18,6 +18,14 @@ def test_parse_task_plan_validates_json_into_task_plan():
     assert plan.steps[0].operation == "READ"
 
 
+def test_parse_task_plan_accepts_json_fence_but_not_non_json_prose():
+    plan = parse_task_plan(
+        '```json\n{"task_id":"task_001","original_request":"Read report",'
+        '"steps":[{"step_id":"step_001","agent":"file_agent","operation":"READ"}]}\n```'
+    )
+    assert plan.task_id == "task_001"
+
+
 @pytest.mark.parametrize(
     "raw_response, expected_message",
     [
@@ -169,7 +177,7 @@ def test_invalid_planner_intent_is_rejected():
         parse_task_plan(
             '{"task_id":"task_001","original_request":"Read report",'
             '"steps":[{"step_id":"step_001","agent":"file_agent",'
-            '"operation":"READ","intent":"DELETE"}]}'
+            '"operation":"READ","intent":"FORMAT"}]}'
         )
 
 

@@ -143,6 +143,7 @@ class PermissionPolicyRegistry:
 
 
 APPROVED_PERMISSION_POLICIES: tuple[PermissionPolicy, ...] = (
+    PermissionPolicy(permission_id="permission.file.list", capability_id="file.list", resource_type=ResourceType.FILE, operation="LIST", scope=PermissionScope(resource_type=ResourceType.FILE, kind=PermissionScopeKind.TASK, selector="current_task.resource"), risk_level=RiskLevel.LOW, decision=PermissionDecision.ALLOW, metadata={"source": "developer", "stage": "M4.2"}),
     PermissionPolicy(
         permission_id="permission.file.read",
         capability_id="file.read",
@@ -199,6 +200,8 @@ APPROVED_PERMISSION_POLICIES: tuple[PermissionPolicy, ...] = (
         decision=PermissionDecision.ALLOW,
         metadata={"source": "developer", "stage": "M4.1"},
     ),
+    PermissionPolicy(permission_id="permission.file.move", capability_id="file.move", resource_type=ResourceType.FILE, operation="MOVE", scope=PermissionScope(resource_type=ResourceType.FILE, kind=PermissionScopeKind.TASK, selector="current_task.resource"), risk_level=RiskLevel.MEDIUM, decision=PermissionDecision.ALLOW, metadata={"source": "developer", "stage": "M4.2"}),
+    PermissionPolicy(permission_id="permission.file.rename", capability_id="file.rename", resource_type=ResourceType.FILE, operation="RENAME", scope=PermissionScope(resource_type=ResourceType.FILE, kind=PermissionScopeKind.TASK, selector="current_task.resource"), risk_level=RiskLevel.MEDIUM, decision=PermissionDecision.ALLOW, metadata={"source": "developer", "stage": "M4.2"}),
 )
 
 

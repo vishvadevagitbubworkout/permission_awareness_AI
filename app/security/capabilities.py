@@ -11,6 +11,7 @@ from app.capabilities.templates import APPROVED_CAPABILITY_TEMPLATE_MAP
 from app.permissions.policies import PermissionScope
 
 _IDENTIFIER = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$")
+_RESOURCE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9 _.\-]{0,127}$")
 _NONCE = re.compile(r"^[A-Za-z0-9_-]{16,128}$")
 _MAC = re.compile(r"^[0-9a-f]{64}$")
 
@@ -65,12 +66,20 @@ class CapabilityClaims(BaseModel):
             raise TypeError("CapabilityClaims cannot be retagged after creation")
         return super().model_copy(update=None, deep=deep)
 
-    @field_validator("capability_id", "task_id", "step_id", "agent", "operation", "resource")
+    @field_validator("capability_id", "task_id", "step_id", "agent", "operation")
     @classmethod
     def validate_identifiers(cls, value: str) -> str:
         normalized = value.strip()
         if normalized != value or not _IDENTIFIER.fullmatch(normalized):
             raise ValueError("capability identifiers must use the established safe identifier format")
+        return normalized
+
+    @field_validator("resource")
+    @classmethod
+    def validate_resource(cls, value: str) -> str:
+        normalized = value.strip()
+        if normalized != value or not _RESOURCE.fullmatch(normalized) or ".." in normalized:
+            raise ValueError("resource must be a bounded relative resource label")
         return normalized
 
     @field_validator("nonce")

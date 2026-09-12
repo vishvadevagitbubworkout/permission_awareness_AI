@@ -10,10 +10,23 @@ _ALLOWED_INTENTS = {
     "READ",
     "MOVE",
     "RENAME",
+    "CREATE",
+    "WRITE",
+    "DELETE",
     "BROWSER_OPEN",
     "EMAIL_DRAFT",
     "EMAIL_SEND",
     "ASK_CLARIFICATION",
+}
+
+_FILE_TEMPLATE_CONTRACTS = {
+    "FILE_LIST": ("LIST", "LIST", "file_manager", "list"),
+    "FILE_READ": ("READ", "READ", "file_manager", "read"),
+    "FILE_MOVE": ("MOVE", "MOVE", "file_manager", "move"),
+    "FILE_RENAME": ("RENAME", "RENAME", "file_manager", "rename"),
+    "FILE_CREATE": ("CREATE", "CREATE", "file_manager", "create"),
+    "FILE_WRITE": ("WRITE", "WRITE", "file_manager", "write"),
+    "FILE_DELETE": ("DELETE", "DELETE", "file_manager", "delete"),
 }
 
 
@@ -81,9 +94,34 @@ class Planner:
 				raise PlanParsingError(
 					"The planning response changed the original user request."
 				)
-			return plan
+			return self._normalize_file_template_proposals(plan)
 		except PlanParsingError as error:
 			unsupported_intent = self._detect_unsupported_intent(raw_response)
 			if unsupported_intent is not None:
 				return self._unsupported_intent_clarification(user_request, unsupported_intent)
 			raise
+
+	@staticmethod
+	def _normalize_file_template_proposals(plan: TaskPlan) -> TaskPlan:
+		"""Convert a declared M1 file template into its fixed M3 contract.
+
+		The model may describe an operation in prose (for example, "create a
+		PDF").  It may not choose M3's agent, canonical operation, or fixed
+		security parameters.  A mismatched intent/template remains untouched and
+		is rejected later by M2/M3.
+		"""
+		for step in plan.steps:
+			if step.template is None:
+				continue
+			contract = _FILE_TEMPLATE_CONTRACTS.get(step.template.value)
+			if contract is None or step.intent is None:
+				continue
+			operation, intent, agent, mode = contract
+			if step.intent.value != intent:
+				continue
+			if operation.lower() not in step.operation.lower():
+				continue
+			step.operation = operation
+			step.agent = agent
+			step.parameters = {"mode": mode}
+		return plan

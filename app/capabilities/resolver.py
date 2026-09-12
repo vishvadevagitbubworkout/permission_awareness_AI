@@ -21,7 +21,26 @@ class CapabilityResolver:
                 "CAPABILITY_NOT_FOUND",
                 "A valid operation string is required to resolve a capability.",
             )
-        return operation.strip().upper()
+        # Only explicit, developer-reviewed aliases are accepted.  In
+        # particular this is not a heuristic "uppercase whatever the model
+        # said" conversion: unknown planner labels fail closed below.
+        aliases = {
+            "LIST": "LIST", "LIST_FILES": "LIST",
+            "READ": "READ", "READ_FILE": "READ",
+            "USER_REQUESTED_READ_DOCUMENTS": "READ",
+            "CREATE": "CREATE", "CREATE_FILE": "CREATE",
+            "WRITE": "WRITE", "WRITE_FILE": "WRITE",
+            "MOVE": "MOVE", "MOVE_FILE": "MOVE",
+            "RENAME": "RENAME", "RENAME_FILE": "RENAME",
+            "DELETE": "DELETE", "DELETE_FILE": "DELETE",
+        }
+        normalized = operation.strip().upper()
+        if normalized not in aliases:
+            raise CapabilityRegistryError(
+                "CAPABILITY_NOT_FOUND",
+                f"Planner operation '{operation}' has no approved canonical mapping.",
+            )
+        return aliases[normalized]
 
     def resolve(self, operation: str, *, resource: str | None = None, agent: str | None = None) -> object:
         normalized_operation = self._normalize_operation(operation)

@@ -9,6 +9,7 @@ from app.planner.ollama_client import OllamaError
 from app.planner.planner import Planner
 from app.planner.parsing import PlanParsingError
 from app.planner.schemas import TaskPlan
+from app.pipeline import M1M5Pipeline
 
 
 def format_plan(plan: TaskPlan) -> str:
@@ -83,22 +84,7 @@ def main() -> int:
 	user_request = input("Task:\n> ").strip()
 
 	try:
-		plan = Planner().create_plan(user_request)
-		intent_result = IntentValidator().validate(plan)
-		scopes = {
-			step.step_id: PermissionScope(
-				resource_type=ResourceType.FILE,
-				kind=PermissionScopeKind.TASK,
-				selector="current_task.resource",
-				resource_id=step.resource,
-			)
-			for step in plan.steps
-		}
-		authorization_results = TaskAuthorizationManager().authorize_plan(
-			plan,
-			intent_result,
-			scopes,
-		)
+		plan, intent_result, security_results = M1M5Pipeline().run(user_request)
 	except (
 		OllamaError,
 		PlanParsingError,
@@ -114,7 +100,10 @@ def main() -> int:
 	print()
 	print(format_intent_result(intent_result))
 	print()
-	print(format_authorization_results(authorization_results))
+	print("M5 Security Results:")
+	for result in security_results:
+		print(f"{result.step_id}: {result.decision} ({result.capability_id or 'unresolved'})")
+		print(f"Reason: {result.reason}")
 	return 0
 
 

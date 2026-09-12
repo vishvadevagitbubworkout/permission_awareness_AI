@@ -32,6 +32,8 @@ def test_generate_returns_model_response(monkeypatch):
             "model": "qwen2.5:3b",
             "prompt": "Plan this task",
             "stream": False,
+            "format": "json",
+            "options": {"temperature": 0},
         }
         assert timeout == 30
         return FakeResponse(b'{"response":"{\\"task_id\\": \\"task_001\\"}"}')

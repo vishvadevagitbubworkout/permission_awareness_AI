@@ -54,10 +54,8 @@ def test_invalid_risk_levels_are_rejected():
 
 def test_predefined_file_capabilities_have_expected_structure():
     assert [template.capability_id for template in APPROVED_CAPABILITY_TEMPLATES] == [
-        "file.read",
-        "file.create",
-        "file.write",
-        "file.delete",
+        "file.list", "file.read", "file.move", "file.rename",
+        "file.create", "file.write", "file.delete",
     ]
     assert all(template.resource_type == ResourceType.FILE for template in APPROVED_CAPABILITY_TEMPLATES)
     assert all(template.parameters for template in APPROVED_CAPABILITY_TEMPLATES)

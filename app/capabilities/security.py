@@ -5,7 +5,13 @@ from app.capabilities.templates import CapabilityTemplateDefinition
 from app.planner.schemas import CapabilityTemplate, PlanStep, PlannerIntent
 
 _TEMPLATE_TO_CAPABILITY = {
+    CapabilityTemplate.FILE_LIST: ("LIST", "file.list"),
     CapabilityTemplate.FILE_READ: ("READ", "file.read"),
+    CapabilityTemplate.FILE_MOVE: ("MOVE", "file.move"),
+    CapabilityTemplate.FILE_RENAME: ("RENAME", "file.rename"),
+    CapabilityTemplate.FILE_CREATE: ("CREATE", "file.create"),
+    CapabilityTemplate.FILE_WRITE: ("WRITE", "file.write"),
+    CapabilityTemplate.FILE_DELETE: ("DELETE", "file.delete"),
 }
 
 
@@ -56,15 +62,20 @@ class CapabilitySecurityValidator:
                     "The planner-declared template has no registered M3 capability.",
                 )
             expected_operation, expected_capability_id = template_contract
+            declared_operation = step.operation.upper()
+            legacy_read_label = declared_operation == "USER_REQUESTED_READ_DOCUMENTS"
             if (
-                step.operation.upper() != expected_operation
+                (declared_operation != expected_operation and not (legacy_read_label and expected_operation == "READ"))
                 or capability.capability_id != expected_capability_id
             ):
                 raise CapabilityRegistryError(
                     "CAPABILITY_NOT_FOUND",
                     "The capability does not match the planner-declared template.",
                 )
-        if step.agent != capability.agent or step.operation.upper() != capability.operation.upper():
+        normalized_step_operation = step.operation.upper()
+        if normalized_step_operation == "USER_REQUESTED_READ_DOCUMENTS":
+            normalized_step_operation = "READ"
+        if step.agent != capability.agent or normalized_step_operation != capability.operation.upper():
             raise CapabilityRegistryError(
                 "CAPABILITY_NOT_FOUND",
                 "The capability does not match the validated step agent and operation.",
